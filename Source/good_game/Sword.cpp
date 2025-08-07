@@ -2,7 +2,7 @@
 
 
 #include "Sword.h"
-#include <Kismet/GameplayStatics.h>
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 
 // Sets default values

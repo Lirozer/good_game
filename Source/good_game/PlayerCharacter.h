@@ -33,6 +33,9 @@ protected:
 	virtual void MoveForwardBack(float Value);
 	virtual void MoveRightLeft(float Value);
 
+	virtual void LookUpDown(float Value);
+	virtual void LookLeftRight(float Value);
+
 	void StartSprinting();
 	void StopSprinting();
 

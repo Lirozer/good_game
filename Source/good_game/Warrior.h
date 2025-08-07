@@ -7,6 +7,8 @@
 
 DECLARE_DELEGATE(FOnHorseRideDelegate)
 
+class AEnemy;
+
 UCLASS()
 class GOOD_GAME_API AWarrior : public APlayerCharacter
 {
@@ -22,6 +24,8 @@ public:
 
 	virtual void PossessedBy(AController *NewController) override;
 	virtual void UnPossessed() override;
+
+	virtual void Tick(float DeltaSeconds) override;
 
 	void ResetAttack();
 
@@ -57,6 +61,13 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation\\Fight\\Block");
 	UAnimMontage *BlockAnimation = nullptr;
 
+	bool bIsTargetLocked = false;
+
+	AEnemy *ClosestEnemy = nullptr;
+
+	void LookUpDown(float Value) override;
+	void LookLeftRight(float Value) override;
+
 	void Crouch();
 	void UnCrouch();
 
@@ -73,4 +84,6 @@ private:
 
 	void Block();
 	void StopBlock();
+
+	void LockTarget();
 };

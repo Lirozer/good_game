@@ -15,6 +15,11 @@ AEnemy::AEnemy() : Super()
     SphereCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
     SphereCollision->SetupAttachment(RootComponent);
     SphereCollision->InitSphereRadius(SPHERE_COLLISION_RADIUS);
+
+    TargetLockDecal = CreateDefaultSubobject<UDecalComponent>(TEXT("TargetLock"));
+    USkeletalMeshComponent *pMesh = GetMesh();
+    TargetLockDecal->SetupAttachment(pMesh);
+    TargetLockDecal->SetVisibility(false);
 }
 
 void AEnemy::BeginPlay()
@@ -91,4 +96,19 @@ void AEnemy::Attack()
     {
         PlayAnimMontage(AttackAnimation2);
     }
+}
+
+void AEnemy::ShowTargetLock()
+{
+    TargetLockDecal->SetVisibility(true);
+}
+
+void AEnemy::HideTargetLock()
+{
+    TargetLockDecal->SetVisibility(false);
+}
+
+bool AEnemy::IsDead()
+{
+    return (Health <= 0);
 }
