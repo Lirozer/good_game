@@ -31,8 +31,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInput)
     PlayerInput->BindAxis("MoveForwardBack", this, &APlayerCharacter::MoveForwardBack);
     PlayerInput->BindAxis("MoveRightLeft", this, &APlayerCharacter::MoveRightLeft);
 
-    PlayerInput->BindAxis("LookUpDown", this, &APlayerCharacter::AddControllerPitchInput);
-    PlayerInput->BindAxis("LookLeftRight", this, &APlayerCharacter::AddControllerYawInput);
+    PlayerInput->BindAxis("LookUpDown", this, &APlayerCharacter::LookUpDown);
+    PlayerInput->BindAxis("LookLeftRight", this, &APlayerCharacter::LookLeftRight);
 
     PlayerInput->BindAction("Sprint", EInputEvent::IE_Pressed, this, &APlayerCharacter::StartSprinting);
     PlayerInput->BindAction("Sprint", EInputEvent::IE_Released, this, &APlayerCharacter::StopSprinting);
@@ -87,6 +87,16 @@ void APlayerCharacter::MoveRightLeft(float Value)
 
     FVector Direction = GetActorRightVector();
     AddMovementInput(Direction, Value);
+}
+
+void APlayerCharacter::LookUpDown(float Value)
+{
+    AddControllerPitchInput(Value);
+}
+
+void APlayerCharacter::LookLeftRight(float Value)
+{
+    AddControllerYawInput(Value);
 }
 
 void APlayerCharacter::StartSprinting()

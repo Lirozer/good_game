@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/DecalComponent.h"
 
 #include "Enemy.generated.h"
 
@@ -24,6 +25,11 @@ public:
 	float GetHealth();
 
 	void Attack();
+
+	void ShowTargetLock();
+	void HideTargetLock();
+
+	bool IsDead();
 
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -45,6 +51,9 @@ private:
 	UAnimMontage *AttackAnimation2 = nullptr;
 
 	float Health = 100;
+
+	UPROPERTY(EditDefaultsOnly)
+	UDecalComponent *TargetLockDecal = nullptr;
 
 	UFUNCTION()
 	void ShowHealthBar();

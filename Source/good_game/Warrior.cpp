@@ -5,14 +5,20 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Components/CapsuleComponent.h"
 
 #include "Interaction.h"
+#include "Enemy.h"
 
 #define LINE_TRACE_SIZE           200
 
 #define ANIMATION_ATTACK_NUMBER   3
 #define ATTACK_DELAY              1
+
+#define TARGET_RADIUS             1000
+#define ROTATION_SPEED            20
 
 // Sets default values
 AWarrior::AWarrior() : Super()
@@ -39,6 +45,8 @@ void AWarrior::SetupPlayerInputComponent(UInputComponent *PlayerInput)
 
     PlayerInput->BindAction("Block", EInputEvent::IE_Pressed, this, &AWarrior::Block);
     PlayerInput->BindAction("Block", EInputEvent::IE_Released, this, &AWarrior::StopBlock);
+
+    PlayerInput->BindAction("LockTarget", EInputEvent::IE_Pressed, this, &AWarrior::LockTarget);
 }
 
 void AWarrior::PossessedBy(AController *NewController)
@@ -53,9 +61,55 @@ void AWarrior::UnPossessed()
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
+void AWarrior::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+
+    if (true == bIsTargetLocked)
+    {
+        bool bIsEnemyDead = ClosestEnemy->IsDead();
+
+        if (true == bIsEnemyDead)
+        {
+            bIsTargetLocked = false;
+            return;
+        }
+
+        FVector Location = GetActorLocation();
+        FVector EnemyLocation = ClosestEnemy->GetActorLocation();
+        EnemyLocation.Z = Location.Z;
+
+        FRotator Rotation = GetActorRotation();
+        FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(Location, EnemyLocation);
+        FRotator SmoothTargetRotation = UKismetMathLibrary::RInterpTo(Rotation, TargetRotation, DeltaSeconds, ROTATION_SPEED);
+
+        GetController()->SetControlRotation(SmoothTargetRotation);
+    }
+}
+
 void AWarrior::ResetAttack()
 {
     bIsAttackDone = false;
+}
+
+void AWarrior::LookUpDown(float Value)
+{
+    if (true == bIsTargetLocked)
+    {
+        return;
+    }
+
+    Super::LookUpDown(Value);
+}
+
+void AWarrior::LookLeftRight(float Value)
+{
+    if (true == bIsTargetLocked)
+    {
+        return;
+    }
+
+    Super::LookLeftRight(Value);
 }
 
 void AWarrior::Crouch()
@@ -190,7 +244,7 @@ void AWarrior::Attack()
 
         default:
         {
-            
+
         }
         break;
     }
@@ -240,5 +294,34 @@ void AWarrior::StopBlock()
     }
 
     StopAnimMontage(BlockAnimation);
+}
+
+void AWarrior::LockTarget()
+{
+    TSubclassOf<AEnemy> EnemyClass = AEnemy::StaticClass();
+    TArray<AActor*> Enemies;
+
+    UGameplayStatics::GetAllActorsOfClass(this, EnemyClass, Enemies);
+
+    for (AActor *Enemy : Enemies)
+    {
+        float EnemyRadius = GetDistanceTo(Enemy);
+
+        if (EnemyRadius <= TARGET_RADIUS)
+        {
+            ClosestEnemy = Cast<AEnemy>(Enemy);
+
+            if (false == bIsTargetLocked)
+            {
+                ClosestEnemy->ShowTargetLock();
+                bIsTargetLocked = true;
+            }
+            else
+            {
+                ClosestEnemy->HideTargetLock();
+                bIsTargetLocked = false;
+            }
+        }
+    }
 }
 
